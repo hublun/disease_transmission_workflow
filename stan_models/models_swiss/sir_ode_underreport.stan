@@ -25,9 +25,9 @@ data {
   int<lower=1> n_days;
   vector[3] y0;
   real t0;
-  real ts[n_days];
+  array[n_days] real ts;
   int N;
-  int cases[n_days];
+  array[n_days] int cases;
 }
 transformed data {
   real x_r[0];
@@ -37,10 +37,11 @@ parameters {
   real<lower=0> gamma;
   real<lower=0> beta;
   real<lower=0> phi_inv;
+  real<lower=0, upper=1> p_rep; # proportion of infected reported
 }
 transformed parameters{
   array[n_days] vector[3] y;
-  real incidence[n_days - 1];
+  array[n_days-1] real incidence;
   real phi = 1. / phi_inv;
   {
     vector[2] theta;
@@ -50,7 +51,7 @@ transformed parameters{
     y = ode_rk45(sir, y0, t0, ts, theta, x_r, x_i);
   }
   for (i in 1:n_days-1){
-    incidence[i] =  y[i, 1] - y[i+1, 1]; //S(t) - S(t-1)
+    incidence[i] =  (y[i, 1] - y[i+1, 1]) * p_rep; //S(t) - S(t-1)
   }
 }
 model {
@@ -58,15 +59,15 @@ model {
   beta ~ normal(2, 1);
   gamma ~ normal(0.4, 0.5);
   phi_inv ~ exponential(5);
+  p_rep ~ beta(1, 2);
   
-  //sampling distribution
-  //col(matrix x, int n) - The n-th column of matrix x. Here the number of infected people 
+ //likelihood
   cases[1:(n_days-1)] ~ neg_binomial_2(incidence, phi);
 }
 generated quantities {
   real R0 = beta / gamma;
   real recovery_time = 1 / gamma;
-  real pred_cases[n_days-1];
+  array[n_days-1] real pred_cases;
   pred_cases = neg_binomial_2_rng(incidence, phi);
 }
 

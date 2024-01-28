@@ -25,9 +25,9 @@ data {
   int<lower=1> n_days;
   vector[3] y0;
   real t0;
-  real ts[n_days];
+  array[n_days] real ts;
   int N;
-  int cases[n_days];
+  array[n_days] int cases;
 }
 transformed data {
   real x_r[0];
@@ -40,7 +40,7 @@ parameters {
 }
 transformed parameters{
   array[n_days] vector[3] y;
-  real incidence[n_days - 1];
+  array[n_days-1] real incidence;
   real phi = 1. / phi_inv;
   {
     vector[2] theta;
@@ -66,7 +66,7 @@ model {
 generated quantities {
   real R0 = beta / gamma;
   real recovery_time = 1 / gamma;
-  real pred_cases[n_days-1];
+  array[n_days-1] real pred_cases;
   pred_cases = neg_binomial_2_rng(incidence, phi);
 }
 

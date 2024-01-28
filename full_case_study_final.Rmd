@@ -14,6 +14,10 @@ abstract: This tutorial shows how to build, fit, and criticize disease transmiss
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE}
 # color palette
 c_light <- c("#fee0d2")
 c_mid <- c("#fc9272")
